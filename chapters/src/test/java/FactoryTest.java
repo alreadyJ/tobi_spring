@@ -17,6 +17,6 @@ public class FactoryTest {
     public void applicationContextTest() {
         ApplicationContext context = new AnnotationConfigApplicationContext(DaoFactory.class);
         UserDaoSeparated userDaoSeparated = context.getBean("userDaoSeparated", UserDaoSeparated.class);
-        
+
     }
 }

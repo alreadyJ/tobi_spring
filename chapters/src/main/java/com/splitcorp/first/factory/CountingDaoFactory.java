@@ -1,29 +1,26 @@
 package com.splitcorp.first.factory;
 
 import com.splitcorp.first.dao.separate.ConnectionMaker;
+import com.splitcorp.first.dao.separate.CountingConnectionMaker;
 import com.splitcorp.first.dao.separate.DConnectionMaker;
 import com.splitcorp.first.dao.separate.UserDaoSeparated;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration //--> applicationContext가 사용할 설정 정보라는 표시
-public class DaoFactory {
-    @Bean //--> IoC 용 메소드
+@Configuration
+public class CountingDaoFactory {
+    @Bean
     public UserDaoSeparated userDaoSeparated() {
-        //return new UserDaoSeparated(new DConnectionMaker());
         return new UserDaoSeparated(connectionMaker());
-
-        // 수정자를 사용하는 경우
-//        UserDaoSeparated userDaoSeparated = new UserDaoSeparated();
-//        userDaoSeparated.setConnectionMaker(connectionMaker());
-//        return userDaoSeparated;
     }
-
-
-
+    // 메소드 이름 틀려서 고생함..
     @Bean
     public ConnectionMaker connectionMaker() {
-        return new DConnectionMaker();
+        return new CountingConnectionMaker(realConnectionMaker());
     }
 
+    @Bean
+    public ConnectionMaker realConnectionMaker() {
+        return new DConnectionMaker();
+    }
 }

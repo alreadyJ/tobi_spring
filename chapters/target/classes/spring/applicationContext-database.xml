@@ -20,26 +20,33 @@
         <property name="username" value="root"/>
         <property name="password" value="kjh83256S@#"/>
     </bean>
-    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <property name="maxUploadSize" value="100000000"/>
-        <property name="maxInMemorySize" value="100000000"/>
+
+    <bean id="connectionMaker" class="com.splitcorp.first.dao.separate.DConnectionMaker"/>
+
+    <bean id="userDaoSeparated" class="com.splitcorp.first.dao.separate.UserDaoSeparated">
+        <property name="connectionMaker" ref="connectionMaker"/>
     </bean>
 
+    <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->
+        <!--<property name="maxUploadSize" value="100000000"/>-->
+        <!--<property name="maxInMemorySize" value="100000000"/>-->
+    <!--</bean>-->
 
-    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-        <property name="dataSource" ref="dataSource" />
-        <property name="configLocation" value="classpath:mybatis-config.xml"/>
-        <property name="mapperLocations" value="classpath:/mapper/**/*_SQL.xml"/>
-    </bean>
 
-    <tx:annotation-driven transaction-manager="transactionManager" />
+    <!--<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">-->
+        <!--<property name="dataSource" ref="dataSource" />-->
+        <!--<property name="configLocation" value="classpath:mybatis-config.xml"/>-->
+        <!--<property name="mapperLocations" value="classpath:/mapper/**/*_SQL.xml"/>-->
+    <!--</bean>-->
 
-    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
-        <property name="dataSource" ref="dataSource" />
-        <property name="globalRollbackOnParticipationFailure" value="false" />
-    </bean>
+    <!--<tx:annotation-driven transaction-manager="transactionManager" />-->
 
-    <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
-        <constructor-arg index="0" ref="sqlSessionFactory" />
-    </bean>
+    <!--<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
+        <!--<property name="dataSource" ref="dataSource" />-->
+        <!--<property name="globalRollbackOnParticipationFailure" value="false" />-->
+    <!--</bean>-->
+
+    <!--<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">-->
+        <!--<constructor-arg index="0" ref="sqlSessionFactory" />-->
+    <!--</bean>-->
 </beans>
