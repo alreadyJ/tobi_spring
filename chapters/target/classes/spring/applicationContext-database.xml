@@ -23,8 +23,13 @@
 
     <bean id="connectionMaker" class="com.splitcorp.first.dao.separate.DConnectionMaker"/>
 
+    <bean id="jdbcContext" class="com.splitcorp.first.dao.separate.JdbcContext">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
     <bean id="userDaoSeparated" class="com.splitcorp.first.dao.separate.UserDaoSeparated">
-        <property name="connectionMaker" ref="connectionMaker"/>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="jdbcContext" ref="jdbcContext"/>
     </bean>
 
     <!--<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">-->

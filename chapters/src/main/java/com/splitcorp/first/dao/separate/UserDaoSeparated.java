@@ -11,8 +11,9 @@ import java.sql.SQLException;
 
 public class UserDaoSeparated {
 
-    private ConnectionMaker connectionMaker;
     private DataSource dataSource;
+    private JdbcContext jdbcContext;
+    private ConnectionMaker connectionMaker;
 
     public DataSource getDataSource() {
         return dataSource;
@@ -22,15 +23,19 @@ public class UserDaoSeparated {
         this.dataSource = dataSource;
     }
 
+    public void setJdbcContext(JdbcContext jdbcContext) {
+        this.jdbcContext = jdbcContext;
+    }
+    /*
     public ConnectionMaker getConnectionMaker() {
         return connectionMaker;
     }
-
+*/
     // 수정자 메소드를 사용하는 경우
-    public void setConnectionMaker(ConnectionMaker connectionMaker) {
+    /*public void setConnectionMaker(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
     }
-
+*/
     public UserDaoSeparated() {
 
     }
@@ -39,6 +44,7 @@ public class UserDaoSeparated {
         //connectionMaker = new DConnectionMaker();
         this.connectionMaker = connectionMaker;
     }
+
 
 
     public void add(final User user) throws ClassNotFoundException, SQLException {
@@ -60,7 +66,14 @@ public class UserDaoSeparated {
         익명 내부 클래스
         */
 
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
+
+        /* 컨텍스트의 역할은? IoC를 할 수 있도록 해주는 Container의 역할이다? */
+        /*
+        * 이 컨텍스트는 JDBC의 일반적인 작업 흐름을 담고 있기 때문에 분리가 필요하다
+        *
+        * 여기서 전략패턴의 jdbcContext의 메소드를 템플릿이라 부르고, 익명 내부 클래스로 만들어진 오브젝트를 콜백이라고 부른다.
+        * */
+        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement(
                         "INSERT INTO user (id, name, password) VALUES (?, ?, ?)");
@@ -80,13 +93,15 @@ public class UserDaoSeparated {
 
 
 
+
+
     public void deleteAll() throws SQLException {
         Connection c = null;
         PreparedStatement ps = null;
 
         try {
-            c = dataSource.getConnection();
-
+            //c = dataSource.getConnection();
+            //dataSource가 없어서 사용 불가
 
             //ps = makeStatement(c);
             StatementStrategy strategy = new DeleteAllStatement();
@@ -116,40 +131,21 @@ public class UserDaoSeparated {
     }
 
     public void deleteAllByStrategy() throws SQLException {
+        this.jdbcContext.executeSql("delete from user");
+        /*
         StatementStrategy st = new DeleteAllStatement();
-        jdbcContextWithStatementStrategy(st);
+        this.jdbcContext.workWithStatementStrategy(st);
+        */
     }
-
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) throws SQLException {
-        Connection c = null;
-        PreparedStatement ps = null;
-
-        try {
-            c = dataSource.getConnection();
-
-            ps = stmt.makePreparedStatement(c);
-
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw e;
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-
-                }
+/*
+    public void executeSql(final String query) throws SQLException {
+        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
+            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                return c.prepareStatement(query);
             }
-
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-
-                }
-            }
-        }
+        });
     }
+*/
 
     protected PreparedStatement makeStatement(Connection c) throws SQLException {
         PreparedStatement ps = c.prepareStatement("delete from user");
@@ -157,7 +153,9 @@ public class UserDaoSeparated {
     }
 
     public int getCount() throws SQLException {
-        Connection c = dataSource.getConnection();
+        //Connection c = dataSource.getConnection();
+        //사용 불가
+        Connection c = null;
 
         PreparedStatement ps = c.prepareStatement("select count(*) from user");
         ResultSet rs = ps.executeQuery();
@@ -170,7 +168,7 @@ public class UserDaoSeparated {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Connection c = connectionMaker.makeConnection();
+        Connection c = dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement(
                 "SELECT * FROM user where id = ?");
