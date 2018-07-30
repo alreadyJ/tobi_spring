@@ -15,4 +15,5 @@
 
     <bean id="user" class="com.splitcorp.first.dto.User" />
 
+    
 </beans>
