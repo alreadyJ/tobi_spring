@@ -1,7 +1,10 @@
 package com.splitcorp.first.dao.separate;
 
+import com.mysql.jdbc.MysqlErrorNumbers;
 import com.splitcorp.first.dto.User;
+import com.splitcorp.first.exception.DuplicateUserIdException;
 import org.apache.ibatis.jdbc.SQL;
+import org.springframework.dao.DuplicateKeyException;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -47,7 +50,7 @@ public class UserDaoSeparated {
 
 
 
-    public void add(final User user) throws ClassNotFoundException, SQLException {
+    public void add(final User user) throws DuplicateUserIdException, SQLException {
         /*class AddStatement implements StatementStrategy {
             public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement(
@@ -73,21 +76,30 @@ public class UserDaoSeparated {
         *
         * 여기서 전략패턴의 jdbcContext의 메소드를 템플릿이라 부르고, 익명 내부 클래스로 만들어진 오브젝트를 콜백이라고 부른다.
         * */
-        this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
-                PreparedStatement ps = c.prepareStatement(
-                        "INSERT INTO user (id, name, password) VALUES (?, ?, ?)");
-                ps.setString(1, user.getId());
-                ps.setString(2, user.getName());
-                ps.setString(3, user.getPassword());
+        try {
+            this.jdbcContext.workWithStatementStrategy(new StatementStrategy() {
+                public PreparedStatement makePreparedStatement(Connection c) throws SQLException {
+                    PreparedStatement ps = c.prepareStatement(
+                            "INSERT INTO user (id, name, password) VALUES (?, ?, ?)");
+                    ps.setString(1, user.getId());
+                    ps.setString(2, user.getName());
+                    ps.setString(3, user.getPassword());
 
-                ps.executeUpdate();
+                    ps.executeUpdate();
 
-                ps.close();
-                c.close();
-                return ps;
+                    ps.close();
+                    c.close();
+                    return ps;
+                }
+            });
+        } catch (SQLException e) {
+            if (e.getErrorCode() == MysqlErrorNumbers.ER_DUP_ENTRY) {
+                throw new DuplicateUserIdException("duplicated user's id, please check it.", e);
+            } else {
+                throw new RuntimeException(e);
             }
-        });
+        }
+
 
     }
 
