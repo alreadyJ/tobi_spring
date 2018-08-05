@@ -2,8 +2,8 @@ package com.splitcorp.first.service;
 
 import com.splitcorp.first.dto.User;
 import com.splitcorp.first.enums.Level;
-import com.splitcorp.first.mail.MailSender;
 import com.splitcorp.first.tamplateCallback.UserDao;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -12,6 +12,8 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.util.List;
+
+\
 
 @Service
 public class UserService {
