@@ -15,4 +15,7 @@
 
     <bean id="user" class="com.splitcorp.first.dto.User" />
 
+    <bean id="userService" class="com.splitcorp.first.service.UserService">
+        <property name="userDao" ref="userDao"/>
+    </bean>
 </beans>

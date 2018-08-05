@@ -3,26 +3,24 @@ import com.splitcorp.first.dao.separate.ConnectionMaker;
 import com.splitcorp.first.dao.separate.DConnectionMaker;
 import com.splitcorp.first.dao.separate.UserDaoSeparated;
 import com.splitcorp.first.dto.User;
-
+import com.splitcorp.first.tamplateCallback.UserDao;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
-import java.sql.SQLException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = "classpath:spring/applicationContext-database.xml")
 public class DaoTest {
 
     @Autowired
-    private UserDaoSeparated userDaoSeparated;
+    private UserDao userDao;
 
     @Autowired
     private ApplicationContext context;
@@ -53,6 +51,7 @@ public class DaoTest {
     }
 
 
+    /*
     @Test
     public void addAndGet() throws ClassNotFoundException , SQLException {
 
@@ -74,5 +73,18 @@ public class DaoTest {
          assertThat(user2.getName(), is(user.getName()));
          assertThat(user2.getPassword(), is(user.getPassword()));
 
+    }*/
+
+    @Test
+    public void userDaoTest() {
+        assertThat(userDao, is(notNullValue()));
+    }
+
+    @Test
+    public void update() {
+        userDao.deleteAll();
+        /*
+        * 이하 생략
+        * */
     }
 }

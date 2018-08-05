@@ -50,10 +50,10 @@
 
     <!--<tx:annotation-driven transaction-manager="transactionManager" />-->
 
-    <!--<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">-->
-        <!--<property name="dataSource" ref="dataSource" />-->
-        <!--<property name="globalRollbackOnParticipationFailure" value="false" />-->
-    <!--</bean>-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource" />
+        <property name="globalRollbackOnParticipationFailure" value="false" />
+    </bean>
 
     <!--<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">-->
         <!--<constructor-arg index="0" ref="sqlSessionFactory" />-->
