@@ -13,8 +13,6 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 import javax.sql.DataSource;
 import java.util.List;
 
-\
-
 @Service
 public class UserService {
     private UserDao userDao;
