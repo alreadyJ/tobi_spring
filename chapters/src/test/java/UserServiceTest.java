@@ -1,11 +1,11 @@
 import com.splitcorp.first.dto.User;
-import com.splitcorp.first.mail.MailSender;
 import com.splitcorp.first.service.UserService;
 import com.splitcorp.first.tamplateCallback.UserDao;
 import exception.TestUserServiceException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
