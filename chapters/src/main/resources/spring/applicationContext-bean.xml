@@ -15,14 +15,30 @@
 
     <bean id="user" class="com.splitcorp.first.dto.User" />
 
-    <bean id="userService" class="com.splitcorp.first.service.UserService">
+    <!--
+     아래 두 개가 데코레이터 패턴, 데코레이터는 userServiceImpl이라는 부가기능을
+     다이나믹하게 부여한다.
+     즉 같은 interface 구현하고 있는 두개의 클래스가 존재하고 그 기능을 분리하여
+     proxy처럼 이용하는 것
+     데코레이터 패턴은 타깃의 코드를 손대지 않고 클라이언트가 호출하는 바업ㅂ도 변경하지
+     않은 채로 새로운 기능을 추가할 때 유용한 방법
+     동적으로 프록시를 만들어주는 것은 reflect
+    -->
+    <!--데코레이터-->
+    <bean id="userService" class="com.splitcorp.first.service.UserServiceTx">
+        <property name="platformTransactionManager" ref="transactionManager"/>
+        <property name="userService" ref="userServiceImpl"/>
+    </bean>
+
+    <!--타깃-->
+    <bean id="userServiceImpl" class="com.splitcorp.first.service.UserServiceImpl">
         <property name="userDao" ref="userDao"/>
-        <property name="dataSource" ref="dataSource"/>
-        <property name="transactionManager" ref="transactionManager"/>
         <property name="mailSender" ref="mailSender"/>
     </bean>
 
     <bean id="mailSender" class="com.splitcorp.first.mail.DummyMailSender">
         <property name="host" value="mail.server.com"/>
     </bean>
+
+
 </beans>

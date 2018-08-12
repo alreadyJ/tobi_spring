@@ -1,5 +1,8 @@
 import com.splitcorp.first.dto.User;
+import com.splitcorp.first.mail.MockMailSender;
 import com.splitcorp.first.service.UserService;
+import com.splitcorp.first.service.UserServiceImpl;
+import com.splitcorp.first.tamplateCallback.TransactionHandler;
 import com.splitcorp.first.tamplateCallback.UserDao;
 import exception.TestUserServiceException;
 import org.junit.Test;
@@ -8,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.transaction.PlatformTransactionManager;
 
-import javax.sql.DataSource;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +27,16 @@ import static org.junit.Assert.fail;
         "classpath:spring/applicationContext-bean.xml"})
 public class UserServiceTest {
     @Autowired
+    private UserServiceImpl userServiceImpl;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
     private UserDao userDao;
 
     @Autowired
-    private DataSource dataSource;
+    private PlatformTransactionManager transactionManager;
 
     @Autowired
     MailSender mailSender;
@@ -42,24 +49,53 @@ public class UserServiceTest {
     @Test
     public void upgradeAllOrNothing() throws Exception {
         List<User> users = new ArrayList<>();
-        UserService testUserService = new TestUserService(users.get(0).getId());
+        UserServiceImpl testUserService = new TestUserService(users.get(0).getId());
         testUserService.setUserDao(this.userDao);// 수동 DI?
-        testUserService.setDataSource(this.dataSource);
+        //testUserService.setDataSource(this.dataSource);
         testUserService.setMailSender(this.mailSender); // 이것은 수동
+        /*
+        UserServiceTx txUserService = new UserServiceTx();
+        txUserService.setPlatformTransactionManager(transactionManager);
+        txUserService.setUserService(testUserService);
+        */
+        TransactionHandler txHandler = new TransactionHandler();
+        txHandler.setTarget(testUserService);
+        txHandler.setTransactionManager(transactionManager);
+        txHandler.setPattern("upgradeLevels");
+        UserService txUserService = (UserService) Proxy.newProxyInstance(
+                getClass().getClassLoader(), new Class[] {UserService.class}, txHandler);
 
         userDao.deleteAll();
         for (User user : users) userDao.add(user);
 
         try {
-            testUserService.upgradeLevels();
+            txUserService.upgradeLevels(); // 기능이 분리된 tx로 호출하도록 변경
             fail("TestUserSericeException expected");
         } catch (TestUserServiceException e) {
 
         }
     }
 
-    private static class TestUserService extends UserService {
+    @Test
+    public void upgradeLevels() throws Exception {
+        List<User> users = new ArrayList<>();
+        userDao.deleteAll();
+        for (User user : users) {
+            userDao.add(user);
+        }
+
+        MockMailSender mockMailSender = new MockMailSender();
+        userServiceImpl.setMailSender(mockMailSender);
+
+        userService.upgradeLevels();
+
+
+    }
+
+    private static class TestUserService extends UserServiceImpl {
         private String id;
+        @Autowired
+        private UserServiceImpl userServiceImpl;
 
         private TestUserService(String id) {
             this.id = id;
@@ -69,6 +105,8 @@ public class UserServiceTest {
         protected void upgradeLevel(User user) {
             if (user.getId().equals(this.id)) throw new TestUserServiceException();
             super.upgradeLevel(user);
+            MockMailSender mockMailSender = new MockMailSender();
+            userServiceImpl.setMailSender(mockMailSender);
         }
     }
 }
