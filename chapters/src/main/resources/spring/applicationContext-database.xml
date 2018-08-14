@@ -55,6 +55,21 @@
         <property name="globalRollbackOnParticipationFailure" value="false" />
     </bean>
 
+    <bean id="transactionAdvice" class="com.splitcorp.first.service.advice.TransactionAdvice">
+        <property name="transactionManager" ref="transactionManager"/>
+    </bean>
+
+    <bean id="transactionPointcut" class="com.splitcorp.first.service.NameMatchClassMethodPointcut">
+        <property name="mappedClassName" value="*ServiceImpl"/>
+        <property name="mappedName" value="upgrade*"/>
+    </bean>
+
+    <bean id="transactionAdvisor" class="org.springframework.aop.support.DefaultPointcutAdvisor">
+        <property name="advice" ref="transactionAdvice"/>
+        <property name="pointcut" ref="transactionPointcut"/>
+    </bean>
+
+
     <!--<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">-->
         <!--<constructor-arg index="0" ref="sqlSessionFactory" />-->
     <!--</bean>-->
